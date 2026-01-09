@@ -5,7 +5,6 @@
 #include <math.h>
 
 #include "FluxGarage_RoboEyes.h"
-#undef N
 #include "RobotSound.h"
 
 #define TOUCH_PIN 2
@@ -108,6 +107,7 @@ void setup() {
 
   sound.begin();
   sound.setDefaultStyle(RobotSound::SOUND_SOFT);
+  sound.intro();
 
   roboEyes.begin(SCREEN_WIDTH, SCREEN_HEIGHT, 100);
   roboEyes.setAutoblinker(ON, 3, 2);

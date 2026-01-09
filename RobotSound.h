@@ -1,6 +1,10 @@
 #pragma once
 #include <Arduino.h>
 
+#ifdef N
+  #undef N
+#endif
+
 struct BeepStep {
   uint16_t freq; // Hz, 0 = silence
   uint16_t ms;   // duration
@@ -55,21 +59,23 @@ public:
   void tap()      { tap(_defaultStyle); }
   void longHold() { longHold(_defaultStyle); }
   void release()  { release(_defaultStyle); }
-  void hello() { const Seq q = seqHello(_defaultStyle); play(q.steps, q.count); }
+  void hello()    { const Seq q = seqHello(_defaultStyle); play(q.steps, q.count); }
+  void intro()    { const Seq q = seqIntro(_defaultStyle); play(q.steps, q.count); } // "M.A.R.O.M.Y"
 
   // ---------- API: per-call style override ----------
   void tap(Style s)      { const Seq q = seqTap(s);      play(q.steps, q.count); }
   void longHold(Style s) { const Seq q = seqLongHold(s); play(q.steps, q.count); }
   void release(Style s)  { const Seq q = seqRelease(s);  play(q.steps, q.count); }
-  void hello(Style s) { const Seq q = seqHello(s); play(q.steps, q.count); }
+  void hello(Style s)    { const Seq q = seqHello(s);    play(q.steps, q.count); }
+  void intro(Style s)    { const Seq q = seqIntro(s);    play(q.steps, q.count); }
 
-  // ---------- NEW API: emotions/events (style-based) ----------
+  // ---------- Moods / events (default style) ----------
   void happy() { const Seq q = seqHappy(_defaultStyle); play(q.steps, q.count); }
   void angry() { const Seq q = seqAngry(_defaultStyle); play(q.steps, q.count); }
   void tired() { const Seq q = seqTired(_defaultStyle); play(q.steps, q.count); }
   void cold()  { const Seq q = seqCold(_defaultStyle);  play(q.steps, q.count); }
 
-  // ---------- NEW API: emotions/events (choose style per call) ----------
+  // ---------- Moods / events (choose style per call) ----------
   void happy(Style s) { const Seq q = seqHappy(s); play(q.steps, q.count); }
   void angry(Style s) { const Seq q = seqAngry(s); play(q.steps, q.count); }
   void tired(Style s) { const Seq q = seqTired(s); play(q.steps, q.count); }
@@ -96,7 +102,7 @@ private:
     _nextMs = millis() + s.ms;
   }
 
-  // ----------------- EXISTING SEQUENCES (tap/hold/release) -----------------
+  // ----------------- SEQUENCES: tap/hold/release -----------------
   static inline const BeepStep SFX_TAP_SOFT[3] = {
     {880, 35}, {0, 30}, {1175, 55}
   };
@@ -130,7 +136,38 @@ private:
     {1700, 22}, {0, 25}, {1400, 50}
   };
 
-  // ----------------- NEW SEQUENCES (Happy/Angry/Tired/Cold) -----------------
+  // ----------------- INTRO: "M.A.R.O.M.Y" (tones only) -----------------
+  // Tip: tweak notes/durations to taste.
+  static inline const BeepStep SFX_INTRO[11] = {
+    { 784, 120 }, { 0, 40 },   // M
+    { 659, 120 }, { 0, 40 },   // A
+    { 784, 120 }, { 0, 40 },   // R
+    { 587, 140 }, { 0, 40 },   // O
+    { 659, 120 }, { 0, 40 },   // M
+    { 988, 200 }               // Y
+  };
+
+  // ----------------- HELLO: friendly motif -----------------
+  static inline const BeepStep SFX_HELLO_SOFT[7] = {
+    {880, 90}, {0, 60},
+    {1047, 90}, {0, 60},
+    {1319, 110}, {0, 70},
+    {988, 140}
+  };
+  static inline const BeepStep SFX_HELLO_SCIFI[9] = {
+    {1400, 60}, {0, 35},
+    {1700, 60}, {0, 35},
+    {2100, 65}, {0, 45},
+    {2600, 80}, {0, 60},
+    {1900, 140}
+  };
+  static inline const BeepStep SFX_HELLO_MINI[5] = {
+    {1800, 40}, {0, 40},
+    {2200, 50}, {0, 50},
+    {2000, 120}
+  };
+
+  // ----------------- MOODS -----------------
   // HAPPY: upward / bright
   static inline const BeepStep SFX_HAPPY_SOFT[5] = {
     {900, 40}, {0, 25}, {1200, 45}, {0, 25}, {1500, 60}
@@ -145,7 +182,7 @@ private:
     {1800, 22}, {0, 18}, {2200, 35}
   };
 
-  // ANGRY: harsh downward / “buzz”
+  // ANGRY: harsh downward
   static inline const BeepStep SFX_ANGRY_SOFT[5] = {
     {600, 55}, {0, 25}, {520, 55}, {0, 25}, {440, 90}
   };
@@ -173,7 +210,7 @@ private:
     {700, 55}, {0, 140}, {520, 110}
   };
 
-  // COLD: “shiver” (two quick ticks then a low)
+  // COLD: “shiver” ticks then a low note
   static inline const BeepStep SFX_COLD_SOFT[7] = {
     {1200, 25}, {0, 45},
     {1200, 25}, {0, 60},
@@ -191,33 +228,11 @@ private:
     {1800, 18}, {0, 40}, {1800, 18}, {0, 55}, {900, 90}
   };
 
-  // HELLO: friendly 3-note motif
-  static inline const BeepStep SFX_HELLO_SOFT[7] = {
-    {880, 90}, {0, 60},
-    {1047, 90}, {0, 60},
-    {1319, 110}, {0, 70},
-    {988, 140}
-  };
-
-  static inline const BeepStep SFX_HELLO_SCIFI[9] = {
-    {1400, 60}, {0, 35},
-    {1700, 60}, {0, 35},
-    {2100, 65}, {0, 45},
-    {2600, 80}, {0, 60},
-    {1900, 140}
-  };
-
-  static inline const BeepStep SFX_HELLO_MINI[5] = {
-    {1800, 40}, {0, 40},
-    {2200, 50}, {0, 50},
-    {2000, 120}
-  };
-
-
-  // ----------------- LENGTH HELPERS -----------------
+  // ----------------- LENGTH HELPER -----------------
   template <size_t kLen>
   static constexpr uint8_t LEN(const BeepStep (&)[kLen]) { return (uint8_t)kLen; }
 
+  // ----------------- PICKERS -----------------
   Seq seqTap(Style s) const {
     switch (s) {
       case SOUND_SOFT:    return { SFX_TAP_SOFT,  LEN(SFX_TAP_SOFT) };
@@ -244,17 +259,21 @@ private:
       default:            return { SFX_REL_SCIFI, LEN(SFX_REL_SCIFI) };
     }
   }
- 
-  Seq seqHello(Style s) const {
-  switch (s) {
-    case SOUND_SOFT:    return { SFX_HELLO_SOFT,  LEN(SFX_HELLO_SOFT) };
-    case SOUND_MINIMAL: return { SFX_HELLO_MINI,  LEN(SFX_HELLO_MINI) };
-    case SOUND_SCIFI:
-    default:            return { SFX_HELLO_SCIFI, LEN(SFX_HELLO_SCIFI) };
-  }
-}
 
-  // -------- NEW pickers --------
+  Seq seqHello(Style s) const {
+    switch (s) {
+      case SOUND_SOFT:    return { SFX_HELLO_SOFT,  LEN(SFX_HELLO_SOFT) };
+      case SOUND_MINIMAL: return { SFX_HELLO_MINI,  LEN(SFX_HELLO_MINI) };
+      case SOUND_SCIFI:
+      default:            return { SFX_HELLO_SCIFI, LEN(SFX_HELLO_SCIFI) };
+    }
+  }
+
+  Seq seqIntro(Style s) const {
+    (void)s; // same intro for all styles (easy to branch later)
+    return { SFX_INTRO, LEN(SFX_INTRO) };
+  }
+
   Seq seqHappy(Style s) const {
     switch (s) {
       case SOUND_SOFT:    return { SFX_HAPPY_SOFT,  LEN(SFX_HAPPY_SOFT) };
