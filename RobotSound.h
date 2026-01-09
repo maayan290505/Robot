@@ -55,11 +55,25 @@ public:
   void tap()      { tap(_defaultStyle); }
   void longHold() { longHold(_defaultStyle); }
   void release()  { release(_defaultStyle); }
+  void hello() { const Seq q = seqHello(_defaultStyle); play(q.steps, q.count); }
 
   // ---------- API: per-call style override ----------
   void tap(Style s)      { const Seq q = seqTap(s);      play(q.steps, q.count); }
   void longHold(Style s) { const Seq q = seqLongHold(s); play(q.steps, q.count); }
   void release(Style s)  { const Seq q = seqRelease(s);  play(q.steps, q.count); }
+  void hello(Style s) { const Seq q = seqHello(s); play(q.steps, q.count); }
+
+  // ---------- NEW API: emotions/events (style-based) ----------
+  void happy() { const Seq q = seqHappy(_defaultStyle); play(q.steps, q.count); }
+  void angry() { const Seq q = seqAngry(_defaultStyle); play(q.steps, q.count); }
+  void tired() { const Seq q = seqTired(_defaultStyle); play(q.steps, q.count); }
+  void cold()  { const Seq q = seqCold(_defaultStyle);  play(q.steps, q.count); }
+
+  // ---------- NEW API: emotions/events (choose style per call) ----------
+  void happy(Style s) { const Seq q = seqHappy(s); play(q.steps, q.count); }
+  void angry(Style s) { const Seq q = seqAngry(s); play(q.steps, q.count); }
+  void tired(Style s) { const Seq q = seqTired(s); play(q.steps, q.count); }
+  void cold(Style s)  { const Seq q = seqCold(s);  play(q.steps, q.count); }
 
   // Optional: play your own sequences
   void playCustom(const BeepStep* seq, uint8_t count) { play(seq, count); }
@@ -82,7 +96,7 @@ private:
     _nextMs = millis() + s.ms;
   }
 
-  // ----------------- SEQUENCES -----------------
+  // ----------------- EXISTING SEQUENCES (tap/hold/release) -----------------
   static inline const BeepStep SFX_TAP_SOFT[3] = {
     {880, 35}, {0, 30}, {1175, 55}
   };
@@ -96,7 +110,6 @@ private:
   static inline const BeepStep SFX_TAP_SCIFI[5] = {
     {1800, 25}, {0, 25}, {1400, 45}, {0, 20}, {2000, 25}
   };
-  // (Pauses made longer so it doesn't feel "too close")
   static inline const BeepStep SFX_HOLD_SCIFI[7] = {
     {1200, 60}, {0, 90},
     {1500, 60}, {0, 90},
@@ -117,42 +130,164 @@ private:
     {1700, 22}, {0, 25}, {1400, 50}
   };
 
-  static constexpr uint8_t lenTapSoft()  { return (uint8_t)(sizeof(SFX_TAP_SOFT)  / sizeof(SFX_TAP_SOFT[0])); }
-  static constexpr uint8_t lenHoldSoft() { return (uint8_t)(sizeof(SFX_HOLD_SOFT) / sizeof(SFX_HOLD_SOFT[0])); }
-  static constexpr uint8_t lenRelSoft()  { return (uint8_t)(sizeof(SFX_REL_SOFT)  / sizeof(SFX_REL_SOFT[0])); }
+  // ----------------- NEW SEQUENCES (Happy/Angry/Tired/Cold) -----------------
+  // HAPPY: upward / bright
+  static inline const BeepStep SFX_HAPPY_SOFT[5] = {
+    {900, 40}, {0, 25}, {1200, 45}, {0, 25}, {1500, 60}
+  };
+  static inline const BeepStep SFX_HAPPY_SCIFI[7] = {
+    {1600, 25}, {0, 20},
+    {1900, 25}, {0, 20},
+    {2300, 30}, {0, 35},
+    {2600, 65}
+  };
+  static inline const BeepStep SFX_HAPPY_MINI[3] = {
+    {1800, 22}, {0, 18}, {2200, 35}
+  };
 
-  static constexpr uint8_t lenTapSci()   { return (uint8_t)(sizeof(SFX_TAP_SCIFI) / sizeof(SFX_TAP_SCIFI[0])); }
-  static constexpr uint8_t lenHoldSci()  { return (uint8_t)(sizeof(SFX_HOLD_SCIFI)/ sizeof(SFX_HOLD_SCIFI[0])); }
-  static constexpr uint8_t lenRelSci()   { return (uint8_t)(sizeof(SFX_REL_SCIFI) / sizeof(SFX_REL_SCIFI[0])); }
+  // ANGRY: harsh downward / “buzz”
+  static inline const BeepStep SFX_ANGRY_SOFT[5] = {
+    {600, 55}, {0, 25}, {520, 55}, {0, 25}, {440, 90}
+  };
+  static inline const BeepStep SFX_ANGRY_SCIFI[7] = {
+    {900, 35}, {0, 20},
+    {850, 35}, {0, 20},
+    {780, 45}, {0, 20},
+    {650, 110}
+  };
+  static inline const BeepStep SFX_ANGRY_MINI[3] = {
+    {900, 35}, {0, 18}, {700, 70}
+  };
 
-  static constexpr uint8_t lenTapMini()  { return (uint8_t)(sizeof(SFX_TAP_MINI)  / sizeof(SFX_TAP_MINI[0])); }
-  static constexpr uint8_t lenHoldMini() { return (uint8_t)(sizeof(SFX_HOLD_MINI) / sizeof(SFX_HOLD_MINI[0])); }
-  static constexpr uint8_t lenRelMini()  { return (uint8_t)(sizeof(SFX_REL_MINI)  / sizeof(SFX_REL_MINI[0])); }
+  // TIRED: slow, low, spaced
+  static inline const BeepStep SFX_TIRED_SOFT[5] = {
+    {500, 70}, {0, 120}, {420, 70}, {0, 140}, {360, 120}
+  };
+  static inline const BeepStep SFX_TIRED_SCIFI[7] = {
+    {700, 60}, {0, 120},
+    {640, 60}, {0, 140},
+    {580, 60}, {0, 160},
+    {520, 140}
+  };
+  static inline const BeepStep SFX_TIRED_MINI[3] = {
+    {700, 55}, {0, 140}, {520, 110}
+  };
+
+  // COLD: “shiver” (two quick ticks then a low)
+  static inline const BeepStep SFX_COLD_SOFT[7] = {
+    {1200, 25}, {0, 45},
+    {1200, 25}, {0, 60},
+    {950, 45},  {0, 70},
+    {700, 120}
+  };
+  static inline const BeepStep SFX_COLD_SCIFI[9] = {
+    {2000, 18}, {0, 35},
+    {2000, 18}, {0, 45},
+    {1700, 22}, {0, 55},
+    {1400, 28}, {0, 60},
+    {900, 120}
+  };
+  static inline const BeepStep SFX_COLD_MINI[5] = {
+    {1800, 18}, {0, 40}, {1800, 18}, {0, 55}, {900, 90}
+  };
+
+  // HELLO: friendly 3-note motif
+  static inline const BeepStep SFX_HELLO_SOFT[7] = {
+    {880, 90}, {0, 60},
+    {1047, 90}, {0, 60},
+    {1319, 110}, {0, 70},
+    {988, 140}
+  };
+
+  static inline const BeepStep SFX_HELLO_SCIFI[9] = {
+    {1400, 60}, {0, 35},
+    {1700, 60}, {0, 35},
+    {2100, 65}, {0, 45},
+    {2600, 80}, {0, 60},
+    {1900, 140}
+  };
+
+  static inline const BeepStep SFX_HELLO_MINI[5] = {
+    {1800, 40}, {0, 40},
+    {2200, 50}, {0, 50},
+    {2000, 120}
+  };
+
+
+  // ----------------- LENGTH HELPERS -----------------
+  template <size_t kLen>
+  static constexpr uint8_t LEN(const BeepStep (&)[kLen]) { return (uint8_t)kLen; }
 
   Seq seqTap(Style s) const {
     switch (s) {
-      case SOUND_SOFT:    return { SFX_TAP_SOFT,  lenTapSoft() };
-      case SOUND_MINIMAL: return { SFX_TAP_MINI,  lenTapMini() };
+      case SOUND_SOFT:    return { SFX_TAP_SOFT,  LEN(SFX_TAP_SOFT) };
+      case SOUND_MINIMAL: return { SFX_TAP_MINI,  LEN(SFX_TAP_MINI) };
       case SOUND_SCIFI:
-      default:            return { SFX_TAP_SCIFI, lenTapSci() };
+      default:            return { SFX_TAP_SCIFI, LEN(SFX_TAP_SCIFI) };
     }
   }
 
   Seq seqLongHold(Style s) const {
     switch (s) {
-      case SOUND_SOFT:    return { SFX_HOLD_SOFT,  lenHoldSoft() };
-      case SOUND_MINIMAL: return { SFX_HOLD_MINI,  lenHoldMini() };
+      case SOUND_SOFT:    return { SFX_HOLD_SOFT,  LEN(SFX_HOLD_SOFT) };
+      case SOUND_MINIMAL: return { SFX_HOLD_MINI,  LEN(SFX_HOLD_MINI) };
       case SOUND_SCIFI:
-      default:            return { SFX_HOLD_SCIFI, lenHoldSci() };
+      default:            return { SFX_HOLD_SCIFI, LEN(SFX_HOLD_SCIFI) };
     }
   }
 
   Seq seqRelease(Style s) const {
     switch (s) {
-      case SOUND_SOFT:    return { SFX_REL_SOFT,  lenRelSoft() };
-      case SOUND_MINIMAL: return { SFX_REL_MINI,  lenRelMini() };
+      case SOUND_SOFT:    return { SFX_REL_SOFT,  LEN(SFX_REL_SOFT) };
+      case SOUND_MINIMAL: return { SFX_REL_MINI,  LEN(SFX_REL_MINI) };
       case SOUND_SCIFI:
-      default:            return { SFX_REL_SCIFI, lenRelSci() };
+      default:            return { SFX_REL_SCIFI, LEN(SFX_REL_SCIFI) };
+    }
+  }
+ 
+  Seq seqHello(Style s) const {
+  switch (s) {
+    case SOUND_SOFT:    return { SFX_HELLO_SOFT,  LEN(SFX_HELLO_SOFT) };
+    case SOUND_MINIMAL: return { SFX_HELLO_MINI,  LEN(SFX_HELLO_MINI) };
+    case SOUND_SCIFI:
+    default:            return { SFX_HELLO_SCIFI, LEN(SFX_HELLO_SCIFI) };
+  }
+}
+
+  // -------- NEW pickers --------
+  Seq seqHappy(Style s) const {
+    switch (s) {
+      case SOUND_SOFT:    return { SFX_HAPPY_SOFT,  LEN(SFX_HAPPY_SOFT) };
+      case SOUND_MINIMAL: return { SFX_HAPPY_MINI,  LEN(SFX_HAPPY_MINI) };
+      case SOUND_SCIFI:
+      default:            return { SFX_HAPPY_SCIFI, LEN(SFX_HAPPY_SCIFI) };
+    }
+  }
+
+  Seq seqAngry(Style s) const {
+    switch (s) {
+      case SOUND_SOFT:    return { SFX_ANGRY_SOFT,  LEN(SFX_ANGRY_SOFT) };
+      case SOUND_MINIMAL: return { SFX_ANGRY_MINI,  LEN(SFX_ANGRY_MINI) };
+      case SOUND_SCIFI:
+      default:            return { SFX_ANGRY_SCIFI, LEN(SFX_ANGRY_SCIFI) };
+    }
+  }
+
+  Seq seqTired(Style s) const {
+    switch (s) {
+      case SOUND_SOFT:    return { SFX_TIRED_SOFT,  LEN(SFX_TIRED_SOFT) };
+      case SOUND_MINIMAL: return { SFX_TIRED_MINI,  LEN(SFX_TIRED_MINI) };
+      case SOUND_SCIFI:
+      default:            return { SFX_TIRED_SCIFI, LEN(SFX_TIRED_SCIFI) };
+    }
+  }
+
+  Seq seqCold(Style s) const {
+    switch (s) {
+      case SOUND_SOFT:    return { SFX_COLD_SOFT,  LEN(SFX_COLD_SOFT) };
+      case SOUND_MINIMAL: return { SFX_COLD_MINI,  LEN(SFX_COLD_MINI) };
+      case SOUND_SCIFI:
+      default:            return { SFX_COLD_SCIFI, LEN(SFX_COLD_SCIFI) };
     }
   }
 
